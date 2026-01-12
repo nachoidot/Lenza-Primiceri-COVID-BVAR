@@ -1,0 +1,167 @@
+---
+title: "Introduction to covidBVAR"
+author: "R port of Lenza & Primiceri (2022)"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to covidBVAR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+The `covidBVAR` package implements the Bayesian Vector Autoregression (BVAR) model with COVID-19 volatility break from:
+
+> Lenza, M., & Primiceri, G. E. (2022). How to estimate a VAR after March 2020. *Journal of Applied Econometrics*, 37(4), 688-699.
+
+This package is a **numerically exact port** of the original MATLAB code, ensuring perfect replication of the paper's results.
+
+## Installation
+
+```{r eval=FALSE}
+# From GitHub
+devtools::install_github("nachoidot/Lenza-Primiceri-COVID-BVAR")
+```
+
+## Quick Start
+
+### Load Data
+
+The package includes monthly U.S. macroeconomic data from December 1988 to May 2021:
+
+```{r load-data}
+library(covidBVAR)
+
+# Load the included dataset
+data(macro_data_may2021)
+
+# View available variables
+cat("Variables:", ncol(macro_data_may2021$data), "\n")
+cat("Observations:", nrow(macro_data_may2021$data), "\n")
+cat("Baseline model variables:\n")
+print(macro_data_may2021$baseline_names)
+```
+
+### Basic Estimation
+
+The main function is `bvar_estimate()`:
+
+```{r basic-estimation, eval=FALSE}
+# Extract baseline model variables (7 variables)
+indmacro <- macro_data_may2021$baseline_indices
+y <- macro_data_may2021$data[
+  macro_data_may2021$key_dates$T0:macro_data_may2021$key_dates$T1estim,
+  indmacro
+]
+y_log <- 100 * log(y)  # Log transformation
+
+# Estimate BVAR with COVID volatility break
+set.seed(10)
+result <- bvar_estimate(
+ y = y_log,
+ lags = 13,                              # 13 monthly lags
+ Tcovid = macro_data_may2021$key_dates$Tcovid,  # March 2020
+ mcmc = 0,                               # Posterior mode only (no MCMC)
+ hyperpriors = 1,                        # Use hyperpriors
+ sur = 0,                                # No SUR prior
+ noc = 0                                 # No NOC prior
+)
+```
+
+### Understanding the Output
+
+The `bvar_estimate()` function returns a list with:
+
+- `postmax`: Posterior mode estimates
+  - `lambda`: Minnesota prior shrinkage parameter
+  - `eta`: COVID volatility parameters (4 values)
+  - `betahat`: VAR coefficient estimates
+  - `sigmahat`: Residual covariance matrix
+  - `logPost`: Log-posterior value
+
+- `mcmc` (if `mcmc = 1`): MCMC draws
+  - `lambda`, `eta`, `theta`, `miu`: Hyperparameter draws
+  - `beta`, `sigma`: VAR parameter draws
+  - `ACCrate`: Acceptance rate
+  - `Dforecast`: Forecast draws
+
+## COVID Volatility Model
+
+The key innovation in Lenza & Primiceri (2022) is modeling the COVID-19 shock as a temporary increase in volatility. The error variance at time $t$ is scaled by $s_t^2$:
+
+$$s_t = \begin{cases}
+\eta_1 & t = \text{March 2020} \\
+\eta_2 & t = \text{April 2020} \\
+1 + (\eta_3 - 1) \eta_4^{t-\text{April 2020}} & t > \text{April 2020}
+\end{cases}$$
+
+Where:
+
+- $\eta_1$: March 2020 volatility multiplier
+- $\eta_2$: April 2020 volatility multiplier
+- $\eta_3$: Asymptotic volatility level
+- $\eta_4$: Convergence speed (geometric decay)
+
+## Example: Impulse Response Functions
+
+```{r irf-example, eval=FALSE}
+# Compute IRF to unemployment shock
+irf <- bvar_irfs(
+ beta = result$postmax$betahat,
+ sigma = result$postmax$sigmahat,
+ nshock = 1,    # Shock to first variable (unemployment)
+ hmax = 48      # 48-month horizon
+)
+
+# Plot response of employment to unemployment shock
+plot(1:48, irf[, 2], type = "l",
+    xlab = "Months", ylab = "Response",
+    main = "Employment response to unemployment shock")
+abline(h = 0, lty = 2)
+```
+
+## MCMC Estimation
+
+For full Bayesian inference with uncertainty quantification:
+
+```{r mcmc-example, eval=FALSE}
+# Run MCMC
+result_mcmc <- bvar_estimate(
+ y = y_log,
+ lags = 13,
+ Tcovid = macro_data_may2021$key_dates$Tcovid,
+ mcmc = 1,                # Enable MCMC
+ Ndraws = 5000,           # Total draws
+ Ndrawsdiscard = 2500,    # Burn-in
+ MCMCconst = 1,           # Proposal scaling
+ hyperpriors = 1
+)
+
+# Check acceptance rate (target: ~25%)
+cat("Acceptance rate:", result_mcmc$mcmc$ACCrate, "\n")
+
+# Posterior summary for lambda
+cat("Lambda posterior mean:", mean(result_mcmc$mcmc$lambda), "\n")
+cat("Lambda 95% CI:", quantile(result_mcmc$mcmc$lambda, c(0.025, 0.975)), "\n")
+```
+
+## References
+
+- Lenza, M., & Primiceri, G. E. (2022). How to estimate a VAR after March 2020. *Journal of Applied Econometrics*, 37(4), 688-699.
+- Giannone, D., Lenza, M., & Primiceri, G. E. (2015). Prior selection for vector autoregressions. *Review of Economics and Statistics*, 97(2), 436-451.
+
+## Session Info
+
+```{r session-info}
+sessionInfo()
+```

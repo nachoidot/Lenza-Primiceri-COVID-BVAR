@@ -3,8 +3,8 @@ Type: Package
 Title: Bayesian VAR with COVID-19 Volatility Extensions
 Version: 0.1.0
 Authors@R: c(
-    person("Package", "Maintainer", email = "maintainer@example.com", role = c("aut", "cre"),
-           comment = "REPLACE WITH REAL NAME AND EMAIL BEFORE CRAN SUBMISSION"),
+    person("Jeaho", "Choi", email = "wogh1217@sogang.ac.kr", role = c("cre"),
+           comment = "Porting Matlab code to R package "),
     person("Michele", "Lenza", role = "aut", comment = "Original MATLAB code author"),
     person("Giorgio E.", "Primiceri", role = "aut", comment = "Original MATLAB code author")
     )
