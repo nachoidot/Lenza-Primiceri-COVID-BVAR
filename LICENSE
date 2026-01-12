@@ -1,0 +1,25 @@
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+This package is a port of MATLAB code accompanying:
+Lenza, M., & Primiceri, G. E. (2022). "How to estimate a VAR after March 2020."
+Journal of Applied Econometrics, 37(4), 688-699.
+
+The original MATLAB code is publicly available as replication materials.
+This R port maintains the same GPL-3 license for academic and research use.
+
+Copyright (C) 2024 [Your Name]
+Original MATLAB code: Copyright (C) 2022 Michele Lenza and Giorgio E. Primiceri
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.

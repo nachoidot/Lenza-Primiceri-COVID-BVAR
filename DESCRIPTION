@@ -1,0 +1,34 @@
+Package: covidBVAR
+Type: Package
+Title: Bayesian VAR with COVID-19 Volatility Extensions
+Version: 0.1.0
+Authors@R: c(
+    person("Package", "Maintainer", email = "maintainer@example.com", role = c("aut", "cre"),
+           comment = "REPLACE WITH REAL NAME AND EMAIL BEFORE CRAN SUBMISSION"),
+    person("Michele", "Lenza", role = "aut", comment = "Original MATLAB code author"),
+    person("Giorgio E.", "Primiceri", role = "aut", comment = "Original MATLAB code author")
+    )
+Description: A faithful line-by-line port of the MATLAB code accompanying
+    Lenza & Primiceri (2022) "How to Estimate a VAR after March 2020"
+    (Journal of Applied Econometrics). This package implements Bayesian Vector
+    Autoregressions with time-varying volatility for the COVID-19 era, following
+    the Giannone-Lenza-Primiceri (2015) methodology with extensions for structural
+    breaks in volatility. All algorithms, priors, and estimation procedures are
+    numerically identical to the original MATLAB implementation.
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 4.0.0)
+Imports:
+    stats,
+    MASS,
+    numDeriv
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    ggplot2,
+    nleqslv
+VignetteBuilder: knitr
+RoxygenNote: 7.3.3
