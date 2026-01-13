@@ -381,17 +381,23 @@ csminit <- function(fcn, x0, f0, g0, bad_grad, H0, ...) {
       f <- fcn(dxtest, ...)
       cat(sprintf('lambda = %10.5g; f = %20.7f\n', lambda, f))
 
-      if (f < fhat) {
-        fhat <- f
-        xhat <- dxtest
-        lambdahat <- lambda
+      # Handle NaN/Inf like MATLAB: treat as bad step, try smaller lambda
+      if (is.nan(f) || is.infinite(f)) {
+        shrinkSignal <- TRUE
+        growSignal <- FALSE
+      } else {
+        if (f < fhat) {
+          fhat <- f
+          xhat <- dxtest
+          lambdahat <- lambda
+        }
+
+        shrinkSignal <- (!bad_grad && (f0 - f < max(c(-THETA * dfhat * lambda, 0)))) ||
+                        (bad_grad && (f0 - f) < 0)
+        growSignal <- !bad_grad && (lambda > 0) && (f0 - f > -(1 - THETA) * dfhat * lambda)
       }
 
       fcount <- fcount + 1
-
-      shrinkSignal <- (!bad_grad && (f0 - f < max(c(-THETA * dfhat * lambda, 0)))) ||
-                      (bad_grad && (f0 - f) < 0)
-      growSignal <- !bad_grad && (lambda > 0) && (f0 - f > -(1 - THETA) * dfhat * lambda)
 
       if (shrinkSignal && ((lambda > lambdaPeak) || (lambda < 0))) {
         if ((lambda > 0) && ((!shrink) || (lambda / factor <= lambdaPeak))) {
