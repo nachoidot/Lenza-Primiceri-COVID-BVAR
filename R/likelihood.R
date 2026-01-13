@@ -213,7 +213,7 @@ log_ml_var_formin <- function(par, y, xdata, lags, T, n, b, MIN, MAX, SS, Vc, po
             sum(lgamma((Td + d - (0:(n-1))) / 2) - lgamma((d - (0:(n-1))) / 2)) +
             -Td * sum(log(psi)) / 2 +
             -n * sum(log(eigaaa)) / 2 +
-            -(T + d) * sum(log(eigbbb)) / 2
+            -(Td + d) * sum(log(eigbbb)) / 2
 
     logML <- logML - norm
   }
@@ -420,7 +420,7 @@ log_ml_var_formcmc <- function(par, y, xdata, lags, T, n, b, MIN, MAX, SS, Vc, p
             sum(lgamma((Td + d - (0:(n-1))) / 2) - lgamma((d - (0:(n-1))) / 2)) +
             -Td * sum(log(psi)) / 2 +
             -n * sum(log(eigaaa)) / 2 +
-            -(T + d) * sum(log(eigbbb)) / 2
+            -(Td + d) * sum(log(eigbbb)) / 2
 
     logML <- logML - norm
   }

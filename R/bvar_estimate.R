@@ -238,7 +238,10 @@ bvar_estimate <- function(y,
 
   opt_result <- csminwel(
     fcn = function(par, ...) {
-      result <- log_ml_var_formin(par, ...)
+      result <- tryCatch(
+        log_ml_var_formin(par, ...),
+        error = function(e) list(logML = NaN)  # Return NaN on error (matches MATLAB behavior)
+      )
       return(result$logML)
     },
     x0 = x0,
